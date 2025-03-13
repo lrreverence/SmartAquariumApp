@@ -1,74 +1,179 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { StyleSheet, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { LineChart } from 'react-native-chart-kit';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function HomeScreen() {
+export default function DashboardScreen() {
+  // TODO: Replace with actual pH reading from your sensor
+  const currentPH = 7.2;
+  const lastWaterChange = new Date('2024-03-20T15:30:00');
+
+  // Sample data for the chart
+  const chartData = {
+    labels: ['12h', '10h', '8h', '6h', '4h', '2h', 'Now'],
+    datasets: [
+      {
+        data: [7.1, 7.3, 7.2, 7.4, 7.2, 7.3, 7.2],
+      },
+    ],
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <ThemedView style={styles.header}>
+        <ThemedText style={styles.title}>Smart Aquarium</ThemedText>
+        <TouchableOpacity style={styles.settingsButton}>
+          <Ionicons name="settings-outline" size={24} color="#4A90E2" />
+        </TouchableOpacity>
+      </ThemedView>
+      
+      <ThemedView style={styles.pHCard}>
+        <ThemedText style={styles.pHLabel}>Current pH Level</ThemedText>
+        <ThemedText style={styles.pHValue}>{currentPH}</ThemedText>
+        <ThemedText style={[
+          styles.pHStatus,
+          { color: currentPH >= 6.5 && currentPH <= 7.5 ? '#4CAF50' : '#FF5252' }
+        ]}>
+          {currentPH >= 6.5 && currentPH <= 7.5 ? 'Optimal' : 'Warning'}
+        </ThemedText>
+      </ThemedView>
+
+      <ThemedView style={styles.chartContainer}>
+        <ThemedText style={styles.chartTitle}>pH History</ThemedText>
+        <LineChart
+          data={chartData}
+          width={Dimensions.get('window').width - 32}
+          height={180}
+          chartConfig={{
+            backgroundColor: '#121212',
+            backgroundGradientFrom: '#121212',
+            backgroundGradientTo: '#121212',
+            decimalPlaces: 1,
+            color: (opacity = 1) => `rgba(74, 144, 226, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(74, 144, 226, ${opacity})`,
+            style: {
+              borderRadius: 16,
+            },
+            propsForBackgroundLines: {
+              strokeDasharray: [], // Solid lines
+              stroke: "rgba(74, 144, 226, 0.1)",
+            },
+            propsForLabels: {
+              fontSize: 12,
+            }
+          }}
+          bezier
+          style={styles.chart}
+          withDots={false}
+          withInnerLines={true}
+          withOuterLines={false}
+          withShadow={false}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
+
+      <ThemedView style={styles.waterChangeCard}>
+        <Ionicons name="water-outline" size={24} color="#4A90E2" />
+        <ThemedView style={styles.waterChangeInfo}>
+          <ThemedText style={styles.waterChangeTitle}>Last Water Change</ThemedText>
+          <ThemedText style={styles.waterChangeTime}>
+            {lastWaterChange.toLocaleDateString()} {lastWaterChange.toLocaleTimeString()}
+          </ThemedText>
+        </ThemedView>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: '#000000',
   },
-  stepContainer: {
-    gap: 8,
+  contentContainer: {
+    padding: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+    backgroundColor: '#000000',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: 'white',
+    letterSpacing: 0.5,
+  },
+  settingsButton: {
+    padding: 8,
+  },
+  pHCard: {
+    padding: 24,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginBottom: 24,
+    backgroundColor: '#1A1A1A',
+    shadowColor: '#4A90E2',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  pHLabel: {
+    fontSize: 18,
+    color: '#B0B0B0',
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  pHValue: {
+    fontSize: 64,
+    fontWeight: 'bold',
+    color: '#4A90E2',
+    marginVertical: 16,
+    textShadowColor: 'rgba(74, 144, 226, 0.3)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  pHStatus: {
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  chartContainer: {
+    backgroundColor: '#1A1A1A',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+  },
+  chartTitle: {
+    fontSize: 18,
+    color: 'white',
+    marginBottom: 16,
+  },
+  chart: {
+    marginVertical: 8,
+    borderRadius: 16,
+  },
+  waterChangeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1A1A1A',
+    padding: 16,
+    borderRadius: 16,
+    gap: 16,
+  },
+  waterChangeInfo: {
+    flex: 1,
+    backgroundColor: '#1A1A1A',
+  },
+  waterChangeTitle: {
+    fontSize: 16,
+    color: '#B0B0B0',
+    marginBottom: 4,
+  },
+  waterChangeTime: {
+    fontSize: 18,
+    color: '#FFFFFF',
+    fontWeight: '500',
   },
 });
